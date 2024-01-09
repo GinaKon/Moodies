@@ -1,3 +1,5 @@
+from flask import Flask, request
+
 # class Movie:
 #    def __init__(self, title, mood):
 #       self.title = title
@@ -32,5 +34,24 @@ def MatchMood (inputmood):
 # Elemental = Movie ("Elemental", "childish")
 
 
-Mood = input('How are you feeling today?')
-print(MatchMood(Mood.strip()))
+# Mood = input('How are you feeling today?')
+# print(MatchMood(Mood.strip()))
+
+app = Flask(__name__)
+
+@app.route('/hello_movie', methods = ["GET"]) #www.google.com
+def hello_movie():
+   try:
+     
+    args = request.args
+    mood = args.get('mood') 
+    return MatchMood(mood)
+
+   except Exception as e:
+    return "Error"
+   
+   
+
+    
+if __name__ == '__main__' :
+  app.run(debug=True, port=8080)
