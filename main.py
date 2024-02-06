@@ -61,17 +61,18 @@ def hello_movie():
     args = request.args
     mood = args.get('mood') 
     
-    #movie_id = MoveMood.join(Mood, MoveMood.mood_id == Mood.mood_id).filter(Mood.name == 'sceptical').all()
-    print ("Hello" )#+ str(Movies(Movies.Movie_Title).filter_by(Movies.Movie_id == '1').all()))
-    #movie = Movies(Movies.Movie_Title).filter_by(Movies.Movie_id == '1').all()
+           # SELECT Movie_Title
+           # FROM movies 
+           # INNER JOIN movemood AS movemood_1 ON movies.`Movie_id` = movemood_1.movie_id, moods 
+           # INNER JOIN movemood AS movemood_2 ON moods.mood_id = movemood_2.mood_id
+           # WHERE moods.name = 'sceptical'
+           # AND movemood_1.id = movemood_2.id;
     
-    #movie = Movies.query.get("1")
-    #print("string " + str(movie.Movie_Title))
-    #film = Movies.query( Movies.Movie_Title).join(MoveMood, Movies.movie_id == MoveMood.movie_id).join(Mood, MoveMood.mood_id == Mood.mood_id).filter(Mood.name == 'sceptical').all()
     movie_alias_1 = aliased(MoveMood)
     movie_alias_2 = aliased(MoveMood)
     movie = Select(Movies.Movie_Title).join(movie_alias_1, Movies.moods).join(movie_alias_2, Mood.Movies).where(Mood.name == mood).where(movie_alias_1.id == movie_alias_2.id)
     print(movie)
+    print("annoying_pair_programming_4")
     mv = db.session.execute(movie).all()
     print(mv)
     return str(mv)
