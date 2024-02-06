@@ -1,4 +1,12 @@
-from flask import Flask, request
+from flask import Flask, request, session
+from models import db, Movies, MoveMood, Mood
+from config import Config
+from sqlalchemy.sql import Select
+from sqlalchemy.orm import aliased
+
+
+
+
 
 # class Movie:
 #    def __init__(self, title, mood):
@@ -38,6 +46,13 @@ def MatchMood (inputmood):
 # print(MatchMood(Mood.strip()))
 
 app = Flask(__name__)
+app.config.from_object(Config) #this is getting all the configuration that are needed to create the db
+db.init_app(app) # this is creating the connection with the db
+
+with app.app_context():
+    db.create_all()  #this is creating the tables we defined in models.py
+
+
 
 @app.route('/hello_movie', methods = ["GET"]) #www.google.com
 def hello_movie():
@@ -45,10 +60,25 @@ def hello_movie():
      
     args = request.args
     mood = args.get('mood') 
-    return MatchMood(mood)
-
+    
+    #movie_id = MoveMood.join(Mood, MoveMood.mood_id == Mood.mood_id).filter(Mood.name == 'sceptical').all()
+    print ("Hello" )#+ str(Movies(Movies.Movie_Title).filter_by(Movies.Movie_id == '1').all()))
+    #movie = Movies(Movies.Movie_Title).filter_by(Movies.Movie_id == '1').all()
+    
+    #movie = Movies.query.get("1")
+    #print("string " + str(movie.Movie_Title))
+    #film = Movies.query( Movies.Movie_Title).join(MoveMood, Movies.movie_id == MoveMood.movie_id).join(Mood, MoveMood.mood_id == Mood.mood_id).filter(Mood.name == 'sceptical').all()
+    movie_alias_1 = aliased(MoveMood)
+    movie_alias_2 = aliased(MoveMood)
+    movie = Select(Movies.Movie_Title).join(movie_alias_1, Movies.moods).join(movie_alias_2, Mood.Movies).where(Mood.name == mood).where(movie_alias_1.id == movie_alias_2.id)
+    print(movie)
+    mv = db.session.execute(movie).all()
+    print(mv)
+    return str(mv)
+   
    except Exception as e:
-    return "Error"
+    return str(e)
+    
    
    
 
