@@ -1,8 +1,9 @@
-from flask import Flask, request, session
+from flask import Flask, request, session, jsonify
 from models import db, Movies, MoveMood, Mood
 from config import Config
 from sqlalchemy.sql import Select
 from sqlalchemy.orm import aliased
+from uuid import uuid4
 
 
 
@@ -80,7 +81,92 @@ def hello_movie():
    except Exception as e:
     return str(e)
     
+
+@app.route('/movies', methods = ["POST"])
+def create_movies():
+  try:
+    
+    movie_title = request.json.get('movie_title')
+    mvt = Movies.query.filter_by(Movie_Title = movie_title).first()
+    if movie_title == None:
+      return jsonify({'error': "Movie Title cannot be null or exists already"})
+    if mvt is not None:
+      return jsonify({'error': "You fucked up"})
+
+    print(movie_title)
+    genre = request.json.get('genre')
+    print(genre)
+    director = request.json.get('Director')
+    print(director)
+    rating = request.json.get('Rating')
+    print(rating)
+
+    new_id = uuid4().hex
+    print(new_id)
+
+    new_movie = Movies(Movie_id=new_id, Movie_Title=movie_title, Genre=genre, Director=director, Rating=rating)
+    print(new_movie)
+
+    db.session.add(new_movie)
+    db.session.commit()
+    print("confirmation")
+
+    return jsonify(new_movie.serialize()),201
+  except ValueError:
+    return jsonify ({'error': 'Invalid request data'}), 400
+  except Exception as e:
+    return jsonify({'error':str(e)}), 500
+  
+
+# /movies/Wonka
+@app.route('/movies/<movie_title>', methods=['DELETE'])
+def delete_movie(movie_title):
+  try:
+    movtt = Movies.query.filter_by(Movie_Title=movie_title).first()
+    print (f'you fucked up {movtt}')
+    if movtt is None:
+      print('hello')
+      return jsonify ({"error": "Movie not found"}), 404
+    
+
+    db.session.delete(movtt)
+    db.session.commit()
+    print("confirmation")
+
+    return jsonify({'message': 'Deleted succesfully'}),200
+  except Exception as e:
+    return jsonify({'error': str(e)}), 500
+  
+
+
+@app.route('/movies/<movie_title>', methods=['PUT'])
+def update_movie(movie_title):
+  try:
+     genre = request.json.get('genre')
+     director = request.json.get('Director')
+     rating = request.json.get('Rating')
+
+     moovs = Movies.query.filter_by(Movie_Title=movie_title).first()
+     if moovs is None:
+       
+       return jsonify({'error': 'Not good enough' })
+  
+     moovs.Genre = genre
+     moovs.Director = director
+     moovs.Rating = rating
+
+
+     
+     db.session.commit()
+
+     return jsonify({'message': 'Succesful Update'}), 200
+  except Exception as e:
+    return jsonify({'error':str(e)})
+    
+
    
+    
+
    
 
     

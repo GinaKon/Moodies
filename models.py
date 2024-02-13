@@ -11,6 +11,15 @@ class Movies(db.Model):
     Rating = db.Column(db.Integer)
     moods = db.relationship('MoveMood', cascade = "all, delete")
 
+    def serialize(self):
+        return{
+            "Movie_id": self.Movie_id,
+            "Movie_Title":self.Movie_Title,
+            "Genre":self.Genre,
+            "Director":self.Director,
+            "Rating":self.Rating
+        }
+
 
 class MoveMood(db.Model):
     __tablename__ = "movemood"
