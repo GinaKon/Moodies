@@ -26,6 +26,13 @@ class MoveMood(db.Model):
     id = db.Column(db.String(70), primary_key=True, unique=True)
     movie_id = db.Column(db.String(70), db.ForeignKey("movies.Movie_id"))
     mood_id = db.Column(db.String(70), db.ForeignKey("moods.mood_id"))
+
+    def serialize(self):
+        return{
+            "id":self.id,
+            "movie_id": self.movie_id,
+            "mood_id": self.mood_id
+        }
     
 
 class Mood(db.Model):
@@ -38,8 +45,8 @@ class Mood(db.Model):
     def serialize(self):
         return {
 
-            'id':self.id,
-            'name': self.mood
+            'id':self.mood_id,
+            'name': self.name
         }
     
 

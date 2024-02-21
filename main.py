@@ -164,11 +164,128 @@ def update_movie(movie_title):
     return jsonify({'error':str(e)})
     
 
-   
+@app.route('/moods', methods=['POST'])
+def add_mood():
+  try:
+    mood_name = request.json.get('name')
+    mdn = Mood.query.filter_by(name = mood_name).first()
+    if mood_name == None:
+      return jsonify({'error': "Mood cannot be null or exists already"})
+    if mdn is not None:
+      return jsonify({'error': "Mood already exists. Try a new one, idiot."})
+
+    print(mood_name)
+
+    new_id = uuid4().hex
+    print(new_id)
+
+    new_mood = Mood(mood_id=new_id, name=mood_name)
+    print(new_mood)
+
+    db.session.add(new_mood)
+    db.session.commit()
+    print("confirmation")
+
+    return jsonify(new_mood.serialize()),201
+  except ValueError:
+    return jsonify ({'error': 'Invalid request data'}), 400
+  except Exception as e:
+    return jsonify({'error':str(e)}), 500
+  
+
+@app.route('/moods/<mood_name>', methods=['DELETE'])
+def delete_mood(mood_name):
+  try:
+    moddlt = Mood.query.filter_by(name=mood_name).first()
+    print (f'you fucked up {moddlt}')
+    if moddlt is None:
+      print('hello')
+      return jsonify ({"error": "Mood not found"}), 404
     
 
-   
+    db.session.delete(moddlt)
+    db.session.commit()
+    print("confirmation")
 
+    return jsonify({'message': 'Deleted succesfully'}),200
+  except Exception as e:
+    return jsonify({'error': str(e)}), 500
+  
+
+@app.route('/get_movie', methods=['GET'])
+def get_movie():
+  
+  try:
+    args = request.args
+    movie = args.get('movie')
+    movied = Movies.query.filter_by(Movie_Title = movie).first()
+    if movied is None:
+      return jsonify({"error":"Movie not found"}), 404
+    return jsonify(movied.serialize()),201
+    
+    
+  except Exception as e:
+    return jsonify({'error': 'Wrong. Give up'})
+  
+
+
+@app.route('/get_mood/<mood_name>', methods=['GET'])
+def get_mood(mood_name):
+  try:
+    mooddet = Mood.query.filter_by(name=mood_name).first()
+    if mooddet is None:
+      print ("Done")
+      return jsonify({'error': 'Mood not found'}), 404
+    print('Help')
+    return jsonify(mooddet.serialize()), 201
+    
+  
+  except Exception as e:
+    print(e)
+    return jsonify ({'error': 'Wrong. Again'})
+  
+
+@app.route('/movemood', methods=['POST'])
+def create_moodmovie():
+  try:
+
+    movie_title = request.json.get('movie_title')
+    mood_name = request.json.get('name')
+    movied = Movies.query.filter_by(Movie_Title = movie_title).first()
+    if movied is None:
+      return jsonify({"error":"Movie not found"}), 404
+    moddlt = Mood.query.filter_by(name=mood_name).first()
+    if moddlt is None:
+      return jsonify({'error':'Mood is not found'}), 404
+
+    new_id = uuid4().hex
+
+    new_movemood = MoveMood(id=new_id, mood_id=moddlt.mood_id, movie_id=movied.Movie_id)
+
+    db.session.add(new_movemood)
+    db.session.commit()
+    print("confirmation")
+
+    return jsonify(new_movemood.serialize()),201
+  except ValueError:
+    return jsonify ({'error': 'Invalid request data'}), 400
+  except Exception as e:
+    return jsonify({'error':str(e)}), 500
+
+
+
+
+
+  
+
+
+  
+    
+    
+    
+    
+
+  
     
 if __name__ == '__main__' :
   app.run(debug=True, port=8080)
