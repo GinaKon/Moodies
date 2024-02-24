@@ -55,12 +55,12 @@ with app.app_context():
 
 
 
-@app.route('/hello_movie', methods = ["GET"]) #www.google.com
-def hello_movie():
+@app.route('/pick_movie', methods = ["GET"]) #creating first endpoint
+def pick_movie():
    try:
      
-    args = request.args
-    mood = args.get('mood') 
+    args = request.args # using the request object to gets the args passed in the URL 
+    mood = args.get('mood') # we are getting the argument "mood"
     
            # SELECT Movie_Title
            # FROM movies 
