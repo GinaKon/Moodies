@@ -14,6 +14,23 @@ db.init_app(app) # this is creating the connection with the db
 with app.app_context():
     db.create_all()  #this is creating the tables we defined in models.py
 
+def add_movie_to_db(new_movie_title, new_genre, new_director, new_rating):
+  new_id = uuid4().hex #Generating new id for the new movie
+
+  new_movie = Movies(Movie_id=new_id, Movie_Title=new_movie_title, Genre=new_genre, Director=new_director, Rating=new_rating) # Creating the new movie and its dets
+
+  db.session.add(new_movie) # Adding new movie in db
+  db.session.commit() # Commit the changes in db
+  return new_movie
+
+def add_mood_to_db(new_mood_name):
+  new_id = uuid4().hex
+
+  new_mood = Mood(mood_id=new_id, name=new_mood_name)
+
+  db.session.add(new_mood)
+  db.session.commit()
+  return new_mood
 
 
 @app.route('/pick_movie', methods = ["GET"]) #creating first endpoint
@@ -56,13 +73,7 @@ def create_movies():
     director = request.json.get('Director')
     rating = request.json.get('Rating')
 
-    new_id = uuid4().hex #Generating new id for the new movie
-
-    new_movie = Movies(Movie_id=new_id, Movie_Title=movie_title, Genre=genre, Director=director, Rating=rating) # Creating the new movie and its dets
-
-    db.session.add(new_movie) # Adding new movie in db
-    db.session.commit() # Commit the changes in db
-
+    new_movie =add_movie_to_db(new_movie_title=movie_title, new_director=director, new_genre=genre, new_rating=rating)
     return jsonify(new_movie.serialize()),201
   except Exception as e:
     return jsonify({'error':str(e)}), 500
@@ -122,12 +133,7 @@ def add_mood():
       return jsonify({'error': "Mood already exists. Try a diferent one."})
 
 
-    new_id = uuid4().hex
-
-    new_mood = Mood(mood_id=new_id, name=mood_name)
-
-    db.session.add(new_mood)
-    db.session.commit()
+    new_mood = add_mood_to_db(new_mood_name=mood_name)
 
     return jsonify(new_mood.serialize()),201
   except Exception as e:
@@ -187,11 +193,13 @@ def create_moodmovie():
     movie_title = request.json.get('movie_title')
     mood_name = request.json.get('name')
     movied = Movies.query.filter_by(Movie_Title = movie_title).first()
+
     if movied is None:
-      return jsonify({"error":"Movie not found"}), 404
+      movied=add_movie_to_db(new_movie_title=movie_title, new_director=None, new_genre=None, new_rating=None )
+
     moddlt = Mood.query.filter_by(name=mood_name).first()
     if moddlt is None:
-      return jsonify({'error':'Mood is not found'}), 404
+      mooddlt = add_mood_to_db(new_mood_name=mood_name)
 
     new_id = uuid4().hex
 
