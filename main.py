@@ -60,7 +60,7 @@ def pick_movie():
    try:
      
     args = request.args # using the request object to gets the args passed in the URL 
-    mood = args.get('mood') # we are getting the argument "mood"
+    mood = args.get('mood') # we are extracting the argument using the get method to get the associated value (movie) with the key 'mood'
     
            # SELECT Movie_Title
            # FROM movies 
@@ -74,7 +74,8 @@ def pick_movie():
     movie = Select(Movies.Movie_Title).join(movie_alias_1, Movies.moods).join(movie_alias_2, Mood.Movies).where(Mood.name == mood).where(movie_alias_1.id == movie_alias_2.id)
     print(movie)
     print("annoying_pair_programming_4")
-    mv = db.session.execute(movie).all()
+    mv = db.session.execute(movie).all() #using "session" is for ORM functionalities, not RAW SQL, 
+                                         # execute method passes through to whatever the session is bound to (the engine)
     print(mv)
     return str(mv)
    
@@ -86,12 +87,12 @@ def pick_movie():
 def create_movies():
   try:
     
-    movie_title = request.json.get('movie_title')
-    mvt = Movies.query.filter_by(Movie_Title = movie_title).first()
+    movie_title = request.json.get('movie_title') #Getting the movie title (again)
+    mvt = Movies.query.filter_by(Movie_Title = movie_title).first() #Searching in Movies table by filtering the titles
     if movie_title == None:
-      return jsonify({'error': "Movie Title cannot be null or exists already"})
+      return jsonify({'error': "Movie Title cannot be null"})
     if mvt is not None:
-      return jsonify({'error': "You fucked up"})
+      return jsonify({'error': "Movie Title already exists"})
 
     print(movie_title)
     genre = request.json.get('genre')
@@ -101,14 +102,14 @@ def create_movies():
     rating = request.json.get('Rating')
     print(rating)
 
-    new_id = uuid4().hex
+    new_id = uuid4().hex #Generating new id for the new movie
     print(new_id)
 
-    new_movie = Movies(Movie_id=new_id, Movie_Title=movie_title, Genre=genre, Director=director, Rating=rating)
+    new_movie = Movies(Movie_id=new_id, Movie_Title=movie_title, Genre=genre, Director=director, Rating=rating) # Creating the new movie and its dets
     print(new_movie)
 
-    db.session.add(new_movie)
-    db.session.commit()
+    db.session.add(new_movie) # Adding new movie in db
+    db.session.commit() # Commit the changes in db
     print("confirmation")
 
     return jsonify(new_movie.serialize()),201
@@ -123,14 +124,14 @@ def create_movies():
 def delete_movie(movie_title):
   try:
     movtt = Movies.query.filter_by(Movie_Title=movie_title).first()
-    print (f'you fucked up {movtt}')
+    print (f'Wrong {movtt}')
     if movtt is None:
       print('hello')
       return jsonify ({"error": "Movie not found"}), 404
     
 
-    db.session.delete(movtt)
-    db.session.commit()
+    db.session.delete(movtt) # deleting the movie
+    db.session.commit() 
     print("confirmation")
 
     return jsonify({'message': 'Deleted succesfully'}),200
@@ -139,7 +140,7 @@ def delete_movie(movie_title):
   
 
 
-@app.route('/movies/<movie_title>', methods=['PUT'])
+@app.route('/movies/<movie_title>', methods=['PUT']) # Updating movie and its dets
 def update_movie(movie_title):
   try:
      genre = request.json.get('genre')
@@ -172,7 +173,7 @@ def add_mood():
     if mood_name == None:
       return jsonify({'error': "Mood cannot be null or exists already"})
     if mdn is not None:
-      return jsonify({'error': "Mood already exists. Try a new one, idiot."})
+      return jsonify({'error': "Mood already exists. Try a diferent one."})
 
     print(mood_name)
 
@@ -212,8 +213,8 @@ def delete_mood(mood_name):
     return jsonify({'error': str(e)}), 500
   
 
-@app.route('/get_movie', methods=['GET'])
-def get_movie():
+@app.route('/fetch_movie', methods=['GET'])
+def fetch_movie():
   
   try:
     args = request.args
