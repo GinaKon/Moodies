@@ -1,1 +1,1 @@
-# GinProject
+# GinProject - Moodies
