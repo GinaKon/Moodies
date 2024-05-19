@@ -65,9 +65,9 @@ def create_movies():
     movie_title = request.json.get('movie_title') #Getting the movie title (again)
     mvt = Movies.query.filter_by(Movie_Title = movie_title).first() #Searching in Movies table by filtering the titles
     if movie_title == None:
-      return jsonify({'error': "Movie Title cannot be null"})
+      return jsonify({'error': "Movie Title cannot be null"}), 422
     if mvt is not None:
-      return jsonify({'error': "Movie Title already exists"})
+      return jsonify({'error': "Movie Title already exists"}), 409
 
     genre = request.json.get('genre')
     director = request.json.get('Director')
@@ -107,7 +107,7 @@ def update_movie(movie_title):
      moovs = Movies.query.filter_by(Movie_Title=movie_title).first()
      if moovs is None:
        
-       return jsonify({'error': 'Movie does not exist.' })
+       return jsonify({'error': 'Movie does not exist.' }), 404
   
      moovs.Genre = genre
      moovs.Director = director
@@ -169,7 +169,7 @@ def fetch_movie():
     
     
   except Exception as e:
-    return jsonify({'error': 'Please try again'})
+    return jsonify({'error': 'Please try again'}), 500
   
 
 
