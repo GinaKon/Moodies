@@ -1,6 +1,6 @@
 import unittest
 from unittest.mock import patch
-from models import Movies
+from models import Movies, Mood
 from main import app
 
 class MoviesTestCase(unittest.TestCase):
@@ -134,6 +134,66 @@ class MoviesTestCase(unittest.TestCase):
 
             self.assertEqual(response.status_code, 404)
 
+    @patch('main.Mood.query')
+    def test_get_mood_if_exists_returns_response_201(self, mocked_mood):
+        with app.app_context():
+            mood = Mood(
+                mood_id="Test",
+                name="Test",
+            )
+            mocked_mood.filter_by.return_value.first.return_value = mood
+
+            response = self.client.get('/get_mood/Test')
+
+            self.assertEqual(response.status_code, 201)
+
+
+    def test_get_moood_if_no_mood_returned_returns_response_404(self):
+        with app.app_context():
+            response = self.client.get('/get_mood/Test')
+
+            self.assertEqual(response.status_code, 404)
+
+    @patch("main.jsonify")
+    @patch('main.db.session')
+    @patch('main.Mood.query')
+    def test_add_mood_with_new_mood_returns_response_201(self, mock_query, mock_db_session, mocked_json):
+        with app.app_context():
+            mood = Mood(
+                mood_id="Test",
+                name="Test"
+            )
+            mock_query.filter_by.return_value.first.return_value = None
+            mock_db_session.add.return_value = mood
+            mocked_json(mood.serialize()).return_value = "Test"
+
+            response = self.client.post('/moods',
+                                        json={'name': 'Create a Mood'})
+
+            self.assertEqual(response.status_code, 201)
+
+
+    def test_add_mood_with_null_value_returns_response_422(self):
+        with app.app_context():
+
+            response = self.client.post('/moods',
+                                        json={'error': 'Null'})
+
+            self.assertEqual(response.status_code, 422)
+
+    @patch('main.Mood.query')
+    def test_add_mood_with_name_already_exists_returns_response_409(self, mock_query):
+        with app.app_context():
+            mood = Mood(
+                mood_id="Test",
+                name="Test"
+            )
+            mock_query.filter_by.return_value.first.return_value = mood
+
+            response = self.client.post('/moods',
+                                        json={'name': "Test"})
+
+            self.assertEqual(response.status_code, 409)
 
 
 if __name__ == '__main__':
