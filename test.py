@@ -3,6 +3,7 @@ from unittest.mock import patch
 from models import Movies, Mood
 from main import app
 
+
 class MoviesTestCase(unittest.TestCase):
     SQLALCHEMY_DATABASE_URI = "sqlite://"
     TESTING = True
@@ -57,7 +58,9 @@ class MoviesTestCase(unittest.TestCase):
             mock_db_session.add.return_value = movie
             mocked_json(movie.serialize()).return_value = "Test"
 
-            response = self.client.post('/movies', json={'movie_title': 'Create a Movie', 'genre': 'Genre', 'director': 'Director', 'rating': 5})
+            response = self.client.post('/movies',
+                                        json={'movie_title': 'Create a Movie', 'genre': 'Genre', 'director': 'Director',
+                                              'rating': 5})
 
             self.assertEqual(response.status_code, 201)
 
@@ -66,7 +69,6 @@ class MoviesTestCase(unittest.TestCase):
             response = self.client.post('/movies', json={'genre': 'Genre', 'director': 'Director', 'rating': 5})
 
             self.assertEqual(response.status_code, 422)
-
 
     @patch('main.Movies.query')
     def test_create_movies_with_duplicate_title_returns_response_409(self, mock_query):
@@ -80,7 +82,9 @@ class MoviesTestCase(unittest.TestCase):
             )
             mock_query.filter_by.return_value.first.return_value = movie
 
-            response = self.client.post('/movies', json={'movie_title': 'Create a Movie', 'genre': 'Genre', 'director': 'Director', 'rating': 5})
+            response = self.client.post('/movies',
+                                        json={'movie_title': 'Create a Movie', 'genre': 'Genre', 'director': 'Director',
+                                              'rating': 5})
 
             self.assertEqual(response.status_code, 409)
 
@@ -102,7 +106,6 @@ class MoviesTestCase(unittest.TestCase):
             response = self.client.delete('/movies/Test')
 
             self.assertEqual(response.status_code, 200)
-
 
     def test_delete_movie_with_invalid_movie_returns_response_404(self):
         with app.app_context():
@@ -147,7 +150,6 @@ class MoviesTestCase(unittest.TestCase):
 
             self.assertEqual(response.status_code, 201)
 
-
     def test_get_moood_if_no_mood_returned_returns_response_404(self):
         with app.app_context():
             response = self.client.get('/get_mood/Test')
@@ -172,10 +174,8 @@ class MoviesTestCase(unittest.TestCase):
 
             self.assertEqual(response.status_code, 201)
 
-
     def test_add_mood_with_null_value_returns_response_422(self):
         with app.app_context():
-
             response = self.client.post('/moods',
                                         json={'error': 'Null'})
 
@@ -194,6 +194,71 @@ class MoviesTestCase(unittest.TestCase):
                                         json={'name': "Test"})
 
             self.assertEqual(response.status_code, 409)
+
+    @patch('main.db.session')
+    @patch('main.Movies.query')
+    def test_delete_mood_with_valid_mood_returns_response_200(self, mock_query, mock_db_session):
+        with app.app_context():
+            mood = Mood(
+                mood_id="Test",
+                name="Test"
+            )
+            mock_query.filter_by.return_value.first.return_value = mood
+            mock_db_session.delete.return_value = None
+            mock_db_session.commit.return_value = None
+
+            response = self.client.delete('/moods/Test')
+
+            self.assertEqual(response.status_code, 200)
+
+    def test_delete_mood_with_invalid_mood_returns_response_404(self):
+        with app.app_context():
+            response = self.client.delete('/moods/Test')
+
+            self.assertEqual(response.status_code, 404)
+
+    @patch('main.db.session')
+    @patch('main.Movies.query')
+    @patch('main.Mood.query')
+    def test_movemood_with_valid_values_returns_response_201(self, mock_query, mock_movies_query, mock_db_session):
+        with app.app_context():
+            movie_title = Movies(
+                Movie_id="Test",
+                Movie_Title="Test",
+                Genre="Test",
+                Director="Test",
+                Rating=5
+            )
+            mood = Mood(
+                mood_id="Test",
+                name="Test"
+            )
+            mock_movies_query.filter_by.return_value.first.return_value = movie_title
+            mock_query.filter_by.return_value.first.return_value = mood
+            mock_db_session.add.return_value = None
+            mock_db_session.commit.return_value = None
+
+            response = self.client.post('/movemood',
+                                        json={'name': "Test",
+                                              'movie_title': "Test"})
+
+            self.assertEqual(response.status_code, 201)
+
+    @patch('main.db.session')
+    @patch('main.Movies.query')
+    @patch('main.Mood.query')
+    def test_movemood_with_empty_values_returns_response_201(self, mock_query, mock_movies_query, mock_db_session):
+        with app.app_context():
+            mock_movies_query.filter_by.return_value.first.return_value = None
+            mock_query.filter_by.return_value.first.return_value = None
+            mock_db_session.add.return_value = None
+            mock_db_session.commit.return_value = None
+
+            response = self.client.post('/movemood',
+                                        json={'name': "Test",
+                                              'movie_title': "Test"})
+
+            self.assertEqual(response.status_code, 201)
 
 
 if __name__ == '__main__':

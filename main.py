@@ -4,8 +4,7 @@ from config import Config
 from sqlalchemy.sql import Select
 from sqlalchemy.orm import aliased
 from uuid import uuid4
-   
-   
+
 
 app = Flask(__name__)
 app.config.from_object(Config)  # this is getting all the configuration that are needed to create the db
@@ -39,12 +38,12 @@ def pick_movie():
         args = request.args # using the request object to get the args passed in the URL
         mood = args.get('mood')  # we are extracting the argument using the get method to get the associated value (movie) with the key 'mood'
     
-           # SELECT Movie_Title
-           # FROM movies 
-           # INNER JOIN movemood AS movemood_1 ON movies.`Movie_id` = movemood_1.movie_id, moods 
-           # INNER JOIN movemood AS movemood_2 ON moods.mood_id = movemood_2.mood_id
-           # WHERE moods.name = 'sceptical'
-           # AND movemood_1.id = movemood_2.id;
+              # SELECT Movie_Title
+              # FROM movies
+              # INNER JOIN movemood AS movemood_1 ON movies.`Movie_id` = movemood_1.movie_id, moods
+              # INNER JOIN movemood AS movemood_2 ON moods.mood_id = movemood_2.mood_id
+              # WHERE moods.name = 'sceptical'
+              # AND movemood_1.id = movemood_2.id;
     
         movie_alias_1 = aliased(MoveMood)
         movie_alias_2 = aliased(MoveMood)
@@ -148,7 +147,7 @@ def delete_mood(mood_name):
     try:
         mood_delete = Mood.query.filter_by(name=mood_name).first()
         if mood_delete is None:
-            return jsonify ({"error": "Mood not found"}), 404
+            return jsonify({"error": "Mood not found"}), 404
 
         db.session.delete(mood_delete)
         db.session.commit()
