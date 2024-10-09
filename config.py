@@ -6,9 +6,9 @@ load_dotenv()
 
 
 class Config:
-    SECRET_KEY = "coso1234"
+    SECRET_KEY = ""
     # set our local database:
-    SQLALCHEMY_DATABASE_URI = 'mysql+pymysql://root:G1nain3dinburgh!@localhost/moodies'
+    SQLALCHEMY_DATABASE_URI = 'mysql+pymysql://root:'
     # to stop loggin messages when we do anything:
     SQLALCHEMY_TRACK_MODIFICATIONS = False
     # to know the state of the db when we run a function (it shows the sql queries that are happening behind scenes):
@@ -19,7 +19,3 @@ class Config:
     SESSION_PERMANENT = False  # indicates whether to use permanent sessions
     SESSION_USE_SIGNER = True  # indicates whether to sign the session cookie identifier
     SESSION_REDIS = redis.from_url('redis://127.0.0.1:3306')  # specifies the Redis instance
-
-    # To run the react frontend part is mandatory uncomment this two configs, but is not to running it in postman which is just http
-    # SESSION_COOKIE_SAMESITE = 'None'
-    # SESSION_COOKIE_SECURE = True
